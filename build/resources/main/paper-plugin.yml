@@ -1,0 +1,7 @@
+name: txcordconnect
+version: '1.0-SNAPSHOT'
+main: to.uk.thexgamelord.txcord.Txcordconnect
+api-version: '1.19'
+load: STARTUP
+authors: [Thexgamelord]
+website: https://github.com/ThexGameLord/TXCORD
