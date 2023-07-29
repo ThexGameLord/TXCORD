@@ -1,3 +1,10 @@
-apiAddress: http://localhost:8080
+#Put the address for where the api is hosted and the port like this https will work as well
+ApiAddress: http://localhost:8080
 
+#use a generator for this or make a secure Authkey as I don't take any RESPONSIBILITY for what can happen to your server
 Authkey: "CHANGE_ME"
+
+#Delay is in minutes so change this wisely as you don't want to go too low or your api server will be rate limited by discord.
+#recommended 2 or higher
+Delay: 2
+#More help needed visit https://github.com/ThexGameLord/TXCORD/ make a new issue and I will help you

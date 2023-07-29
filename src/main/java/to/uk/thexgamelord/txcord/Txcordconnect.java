@@ -44,6 +44,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
         FileConfiguration config = getConfig();
         String apiAddress = config.getString("apiAddress");
         String Authkey = config.getString("Authkey");
+        int PDELAY = config.getInt("Delay");
         getLogger().info("[txcordconnect] Using " + apiAddress + " For api");
 
         TimerTask task = new TimerTask() {
@@ -82,6 +83,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
                     }
 
                     int responseCode = connection.getResponseCode();
+                    getLogger().info("[txcordconnect] API responded with: " + responseCode);
                     // Handle the API response code as needed
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -102,6 +104,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
                     }
 
                     int responseCode = connection.getResponseCode();
+                    getLogger().info("[txcordconnect] API responded with: " + responseCode);
                     // Handle the API response code as needed
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -111,7 +114,8 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
 
         // Schedule the task to run every 1 minute (60 seconds)
         Timer timer = new Timer();
-        timer.schedule(task, 0, 60000);
+        timer.schedule(task, 0, PDELAY/60000);
+
     }
 
     private String convertListToJson(List<String> list) {
