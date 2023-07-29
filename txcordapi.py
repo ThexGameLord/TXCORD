@@ -2,6 +2,7 @@ import os
 import socket
 import requests
 import json
+import re  # Import the regular expression module
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import configparser
 
@@ -27,6 +28,7 @@ if 'PORT' in os.environ:
 else:
     config = configparser.ConfigParser()
     config.read(config_file)
+    print("using config file")
     PORT = config.getint('TXCORDAPI', 'PORT', fallback=8080)
 
 if not all([WEBHOOK_URL, AUTH_KEY, PORT]):
@@ -41,9 +43,11 @@ if not all([WEBHOOK_URL, AUTH_KEY, PORT]):
         with open(config_file, 'w') as cfgfile:
             config.write(cfgfile)
 
+payload_data = {}
+class CustomRequestHandler(BaseHTTPRequestHandler):
 
-class RequestHandler(BaseHTTPRequestHandler):
-
+    def version_string(self):
+        return 'TXCORDAPI/1.0'
     
     def _set_headers(self):
         self.send_response(200)
@@ -53,6 +57,19 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
             self.handle_default_get()
+        elif self.path == '/favicon.ico':
+            self.do_favicon()
+        elif self.path == '/.htaccess':
+            self.send_response(403)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'Nice try but this is a custom http server')
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'Not Found')
+
 
     
     def handle_default_get(self):
@@ -64,7 +81,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         print(query_params)
 
         # Get the player count using format_payload and update the global variable
-        
+        global payload_data
         default_landing = f'''
         <!DOCTYPE html>
         <html>
@@ -73,8 +90,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         </head>
         <body>
         <h1>Welcome to TXCORDAPI</h1>
-        <p>UNKNOWN</p>
-        <a>The User Interface has not actually been made yet.</a>
+        <p>{format_payload(payload_data)}</p>
+        <a>A User Interface will be here when i figure out how to get it working</a>
         <button onclick="window.location.href='https://github.com/thexgamelord/txcord'">TXCORD on github</button>
         </body>
         </html>
@@ -95,6 +112,21 @@ class RequestHandler(BaseHTTPRequestHandler):
                 key, value = param.split('=')
                 query_params[key] = value
         return query_params
+
+    def do_favicon(self):
+        # Open and read the favicon.ico file in binary mode
+        with open('favicon.ico', 'rb') as favicon_file:
+            favicon = favicon_file.read()
+
+        # Set the appropriate headers for the favicon.ico file
+        self.send_response(200)
+        self.send_header('Content-type', 'image/x-icon')
+        self.send_header('Content-Length', len(favicon))
+        self.end_headers()
+
+        # Send the favicon.ico file content as the response
+        self.wfile.write(favicon)
+
 
     def do_POST(self):
         if self.path == '/api/playernames':
@@ -143,6 +175,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(b'Received')
 
     def send_to_discord_webhook(self, payload, webhook_url):
+        global payload_data
         headers = {'Content-Type': 'application/json'}
 
         data = {
@@ -159,6 +192,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if response.status_code == 204:
             print('Payload sent to Discord webhook successfully.')
+            # Update the global variable with the payload data
+            payload_data = json.loads(payload)
         else:
             print('Failed to send payload to Discord webhook. Status code:',
                   response.status_code)
@@ -195,14 +230,27 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(message.encode())
 
 
+def sanitize_motd(motd):
+    # Use regular expression to remove color codes (e.g., Â§b) and other special characters
+    sanitized_motd = re.sub(r'Â§.', '', motd)
+    return sanitized_motd
+
 def format_payload(payload):
-    payload_dict = json.loads(payload)
+    if isinstance(payload, str):
+        payload_dict = json.loads(payload)
+    else:
+        payload_dict = payload
+
     player_count = payload_dict.get('playerCount', 'N/A')
     max_player_count = payload_dict.get('maxPlayerCount', 'N/A')
     server_motd = payload_dict.get('Motd', 'N/A')
+
+    # Sanitize the MOTD before displaying
+    sanitized_motd = sanitize_motd(server_motd)
+
     formatted_payload = f'''
     Player Count: {player_count} / {max_player_count}
-    Server Motd: {server_motd}
+    Server Motd: {sanitized_motd}
     '''
     return formatted_payload
 
@@ -253,4 +301,4 @@ def run(server_class, handler_class, port):
 
 
 if __name__ == '__main__':
-    run(HTTPServer, RequestHandler, 8080)
+    run(HTTPServer, CustomRequestHandler, PORT)
