@@ -34,7 +34,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
         File configFile = new File(getDataFolder(), "config.yml");
         if (!configFile.exists()) {
             saveDefaultConfig();
-            getLogger().info("[txcordconnect] Generating");
+            getLogger().info("Generating");
         }
 
         // Load the config
@@ -42,10 +42,10 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
 
         // Read the API IP address from the config file
         FileConfiguration config = getConfig();
-        String apiAddress = config.getString("apiAddress");
+        String apiAddress = config.getString("ApiAddress");
         String Authkey = config.getString("Authkey");
         int PDELAY = config.getInt("Delay");
-        getLogger().info("[txcordconnect] Using " + apiAddress + " For api");
+        getLogger().info("Using " + apiAddress + " For api");
 
         TimerTask task = new TimerTask() {
             @Override
@@ -83,7 +83,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
                     }
 
                     int responseCode = connection.getResponseCode();
-                    getLogger().info("[txcordconnect] API responded with: " + responseCode);
+                    getLogger().info("API responded with: " + responseCode);
                     // Handle the API response code as needed
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -104,7 +104,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
                     }
 
                     int responseCode = connection.getResponseCode();
-                    getLogger().info("[txcordconnect] API responded with: " + responseCode);
+                    getLogger().info("API responded with: " + responseCode);
                     // Handle the API response code as needed
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -114,7 +114,7 @@ public final class Txcordconnect extends JavaPlugin implements Listener {
 
         // Schedule the task to run every 1 minute (60 seconds)
         Timer timer = new Timer();
-        timer.schedule(task, 0, PDELAY/60000);
+        timer.schedule(task, 0, PDELAY * 60000);
 
     }
 
