@@ -91,11 +91,11 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         <body>
         <h1>Welcome to TXCORDAPI</h1>
         <p>{format_payload(payload_data)}</p>
-        <a>A User Interface will be here when i figure out how to get it working</a>
+        <a>A better User Interface will be made later.</a>
         <button onclick="window.location.href='https://github.com/thexgamelord/txcord'">TXCORD on github</button>
         </body>
         </html>
-        ''' 
+        '''
         finished_get_response = default_landing.encode('utf-8')
         self.send_response(200)  # Send the response status code
         self.send_header('Content-type', 'text/html')  # Set the correct Content-Type header
@@ -231,8 +231,8 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
 
 
 def sanitize_motd(motd):
-    # Use regular expression to remove color codes (e.g., Â§b) and other special characters
-    sanitized_motd = re.sub(r'Â§.', '', motd)
+    # Use regular expression to remove color codes (e.g., §b) and other special characters
+    sanitized_motd = re.sub(r'§.', '', motd)
     return sanitized_motd
 
 def format_payload(payload):
