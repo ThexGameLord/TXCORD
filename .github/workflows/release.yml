@@ -10,6 +10,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+      GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
@@ -18,6 +22,10 @@ jobs:
         python-version: "3.10"
     - name: Install bump2version
       run: pip install bump2version
+    - name: Set Git identity
+      run: |
+        git config --global user.email "${GIT_EMAIL}"
+        git config --global user.name "${GIT_USERNAME}"
     - name: Bump Version
       run: |
         bump2version patch --config-file bumpversion.cfg
