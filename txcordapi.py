@@ -95,7 +95,7 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         <button onclick="window.location.href='https://github.com/thexgamelord/txcord'">TXCORD on github</button>
         </body>
         </html>
-        '''
+        ''' 
         finished_get_response = default_landing.encode('utf-8')
         self.send_response(200)  # Send the response status code
         self.send_header('Content-type', 'text/html')  # Set the correct Content-Type header
