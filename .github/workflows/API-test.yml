@@ -30,7 +30,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
         pip install configparser
-        pip install pytest
     - name: Test API
       run: |
-        pytest txcordapi.py
+        nohup python txcordapi.py &
+        sleep 5
+        
+    - name: Stop API server
+      run: |
+        pkill -f "python txcordapi.py"
