@@ -20,10 +20,7 @@ jobs:
       run: pip install bump2version
     - name: Bump Version
       run: |
-        # Run the command to bump the version in txcordapi.py
-        # Replace 'patch' with 'minor' or 'major' as needed
-        bump2version patch --config-file txcordapi.py
-        # Commit the changes
+        bump2version patch --config-file bumpversion.cfg
         git add txcordapi.py
         git commit -m "Bump version"
         git push origin API
