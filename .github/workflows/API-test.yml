@@ -32,9 +32,11 @@ jobs:
         pip install configparser
     - name: Test API
       run: |
-        nohup python txcordapi.py &
+        nohup python txcordapi.py > server_output.txt 2>&1 &
         sleep 5
+        cat server_output.txt
         
     - name: Stop API server
       run: |
+        sleep 5
         pkill -f "python txcordapi.py"
