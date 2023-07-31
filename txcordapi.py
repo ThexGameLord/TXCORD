@@ -2,11 +2,11 @@ import os
 import socket
 import requests
 import json
-import re  # Import the regular expression module  
+import re  # Import the regular expression module
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import configparser
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 config_file = "TXCORDAPI.cfg"
 
@@ -263,19 +263,6 @@ def format_player_list(payload):
     formatted_player_list = "\n".join(player_list)
     return formatted_player_list
 
-
-def get_public_ip():
-    try:
-        # Use a public service to determine the public IP address
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(("1.1.1.1", 80))
-            public_ip = s.getsockname()[0]
-        return public_ip
-    except Exception as e:
-        print("Error while fetching public IP:", e)
-        return None
-
-
 def get_local_ip():
     try:
         # Get the local IP address of the machine
@@ -289,16 +276,10 @@ def get_local_ip():
 def run(server_class, handler_class, port):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    #print(f'Starting server on port {port}...')
-    # Get and print the public IP address
-    public_ip = get_public_ip()
-    if public_ip:
-        print(f"Starting server on Public IP: {public_ip} : {port}")
-
     # Get and print the local IP address
     local_ip = get_local_ip()
     if local_ip:
-        print(f"Starting server on Local IP: {local_ip} : {port}")
+        print(f"Starting server on http://{local_ip}:{port}")
     httpd.serve_forever()
 
 
