@@ -30,8 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
         pip install configparser
-        pip install request
-        pip install http
     - name: Test API
       run: |
         py txcordapi.py
