@@ -32,4 +32,4 @@ jobs:
         pip install configparser
     - name: Test API
       run: |
-        py txcordapi.py
+        python txcordapi.py
