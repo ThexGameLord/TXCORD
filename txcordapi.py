@@ -6,6 +6,8 @@ import re  # Import the regular expression module
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import configparser
 
+__version__ = "1.0.0"
+
 config_file = "TXCORDAPI.cfg"
 
 # Check for environment variables or read from the config file
