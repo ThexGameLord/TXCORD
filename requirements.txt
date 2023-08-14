@@ -1,5 +1,4 @@
 requests
-re
 argparse
 http.server
 configparser
