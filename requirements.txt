@@ -2,3 +2,4 @@ requests
 argparse
 configparser
 datetime
+colorama
