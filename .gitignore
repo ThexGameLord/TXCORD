@@ -1,3 +1,5 @@
 *.cfg
 *.spec
+favicon.ico
 build/
+dist/
