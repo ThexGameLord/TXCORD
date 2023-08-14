@@ -2,13 +2,24 @@ import os
 import socket
 import requests
 import json
-import re  # Import the regular expression module
+import re
+import argparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import configparser
+import base64
+import datetime
+from colorama import Fore, Style, init
 
-__version__ = "1.0.1"
-
+init(autoreset=True)  # Initialize colorama
+global DEBUG_MODE
+DEBUG_MODE = False
 config_file = "TXCORDAPI.cfg"
+
+global ver_str
+ver_str = "TXCORDAPI/1.1"
+
+print(Fore.GREEN + f"Running {ver_str}" + Style.RESET_ALL)
+print("[ATTENTION] you can do txcordapi -h to show all arguements that can be used")
 
 # Check for environment variables or read from the config file
 if 'WEBHOOK_URL' in os.environ:
@@ -33,6 +44,20 @@ else:
     print("using config file")
     PORT = config.getint('TXCORDAPI', 'PORT', fallback=8080)
 
+if 'API_USER' in os.environ:
+    API_USER = os.environ['API_USER']
+else:
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    API_USER = config.get('TXCORDAPI', 'API_USER', fallback='DEMO')
+
+if 'API_PASS' in os.environ:
+    API_PASS = os.environ['API_PASS']
+else:
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    API_PASS = config.get('TXCORDAPI', 'API_PASS', fallback='DEMO')
+
 if not all([WEBHOOK_URL, AUTH_KEY, PORT]):
     # Create the config file with default values if it doesn't exist
     if not os.path.exists(config_file):
@@ -40,25 +65,49 @@ if not all([WEBHOOK_URL, AUTH_KEY, PORT]):
         config['TXCORDAPI'] = {
             'WEBHOOK_URL': 'https://discord.com/api/webhooks/xxxxxxxxxx',
             'AUTH_KEY': 'CHANGE_ME',
-            'PORT': '8080'
+            'PORT': '8080',
+            'API_USER': 'DEMO',
+            'API_PASS': 'DEMO',
         }
         with open(config_file, 'w') as cfgfile:
             config.write(cfgfile)
 
 payload_data = {}
 class CustomRequestHandler(BaseHTTPRequestHandler):
-
+    def __init__(self, *args, **kwargs):
+        self.last_auth_time = None  # Initialize the last_auth_time
+        super().__init__(*args, **kwargs)
+        
     def version_string(self):
-        return 'TXCORDAPI/1.0'
+        return ver_str
     
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
 
-    def do_GET(self):
+    def check_basic_auth(self):
+        auth_header = self.headers.get('Authorization')
+        if auth_header:
+            current_time = datetime.datetime.now()
+            if self.last_auth_time is None or (current_time - self.last_auth_time).total_seconds() > 3:  # 1 hour in seconds
+                credentials = auth_header.split(' ')[1]
+                decoded_credentials = base64.b64decode(credentials).decode('utf-8')
+                username, password = decoded_credentials.split(':')
+                if username == API_USER and password == API_PASS:
+                    self.last_auth_time = current_time  # Update the last_auth_time
+                    return True
+        return False
+
+    def do_GET(self):      
         if self.path == '/':
-            self.handle_default_get()
+            if self.check_basic_auth():
+                self.handle_default_get()
+            else:
+                self.send_response(401)
+                self.send_header('WWW-Authenticate', 'Basic realm="Authentication required"')
+                self.end_headers()
+                self.wfile.write(b'Unauthorized')
         elif self.path == '/favicon.ico':
             self.do_favicon()
         elif self.path == '/.htaccess':
@@ -79,8 +128,9 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         query_params = self.parse_query_string(self.path)
 
         # Print the received data
-        print("Received data:")
-        print(query_params)
+        if DEBUG_MODE == True:
+            print(Fore.RED + "[DEBUG] Received data:" + Style.RESET_ALL)
+            print(query_params)
 
         # Get the player count using format_payload and update the global variable
         global payload_data
@@ -116,18 +166,40 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         return query_params
 
     def do_favicon(self):
-        # Open and read the favicon.ico file in binary mode
-        with open('favicon.ico', 'rb') as favicon_file:
-            favicon = favicon_file.read()
+        try:
+            with open('favicon.ico', 'rb') as favicon_file:
+                favicon = favicon_file.read()
 
-        # Set the appropriate headers for the favicon.ico file
-        self.send_response(200)
-        self.send_header('Content-type', 'image/x-icon')
-        self.send_header('Content-Length', len(favicon))
-        self.end_headers()
+            self.send_response(200)
+            self.send_header('Content-type', 'image/x-icon')
+            self.send_header('Content-Length', len(favicon))
+            self.end_headers()
+            self.wfile.write(favicon)
+        except FileNotFoundError:
+            self.send_fallback_favicon()
+            print(Fore.RED + "no favicon.ico file was found so we sent the default one")
+            print(Style.RESET_ALL)  # Reset to default style
+        except Exception as e:
+            self.send_error_response("Internal server error")
+            print(e)
 
-        # Send the favicon.ico file content as the response
-        self.wfile.write(favicon)
+    def send_fallback_favicon(self):
+        fallback_favicon_url = "https://raw.githubusercontent.com/ThexGameLord/TXCORD/API/favicon.ico"
+
+        try:
+            response = requests.get(fallback_favicon_url)
+            if response.status_code == 200:
+                self.send_response(200)
+                self.send_header('Content-type', 'image/x-icon')
+                self.send_header('Content-Length', len(response.content))
+                self.end_headers()
+                self.wfile.write(response.content)
+            else:
+                self.send_error_response("Fallback favicon not available")
+        except Exception as e:
+            self.send_error_response("Error fetching fallback favicon")
+            print(e)
+
 
 
     def do_POST(self):
@@ -140,9 +212,10 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
 
-        # Print the received data
-        print("Received data:")
-        print(post_data.decode('utf-8'))
+        # Print the received data DEBUG OPTION FOR ARGS
+        if DEBUG_MODE == True:
+            print(Fore.RED + "[DEBUG] Received data:" + Style.RESET_ALL)
+            print(post_data.decode('utf-8'))
 
         # Check if Authkey matches
         auth_key = self.headers.get('Authkey')
@@ -161,8 +234,9 @@ class CustomRequestHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
 
         # Print the received player names data
-        print("Received player names data:")
-        print(post_data.decode('utf-8'))
+        if DEBUG_MODE == True:
+            print(Fore.RED + "[DEBUG] Received player names data:" + Style.RESET_ALL)
+            print(post_data.decode('utf-8'))
 
         # Check if Authkey matches
         auth_key = self.headers.get('Authkey')
@@ -247,8 +321,11 @@ def format_payload(payload):
     max_player_count = payload_dict.get('maxPlayerCount', 'N/A')
     server_motd = payload_dict.get('Motd', 'N/A')
 
+    # Decode the MOTD using the correct encoding (UTF-8) before processing color codes
+    decoded_motd = server_motd.encode('latin-1').decode('utf-8')
+
     # Sanitize the MOTD before displaying
-    sanitized_motd = sanitize_motd(server_motd)
+    sanitized_motd = sanitize_motd(decoded_motd)
 
     formatted_payload = f'''
     Player Count: {player_count} / {max_player_count}
@@ -263,6 +340,19 @@ def format_player_list(payload):
     formatted_player_list = "\n".join(player_list)
     return formatted_player_list
 
+
+def get_public_ip():
+    try:
+        # Use a public service to determine the public IP address
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("1.1.1.1", 80))
+            public_ip = s.getsockname()[0]
+        return public_ip
+    except Exception as e:
+        print("Error while fetching public IP:", e)
+        return None
+
+
 def get_local_ip():
     try:
         # Get the local IP address of the machine
@@ -276,12 +366,28 @@ def get_local_ip():
 def run(server_class, handler_class, port):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
+    #print(f'Starting server on port {port}...')
+    # Get and print the public IP address
+    public_ip = get_public_ip()
+    if public_ip:
+        print(Fore.GREEN + f"Starting server on Public IP: {public_ip} : {port}" + Style.RESET_ALL)
+
     # Get and print the local IP address
     local_ip = get_local_ip()
     if local_ip:
-        print(f"Starting server on http://{local_ip}:{port}")
+        print(Fore.GREEN + f"Starting server on Local IP: {local_ip} : {port}" + Style.RESET_ALL)
     httpd.serve_forever()
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='TXCORDAPI Server')
+
+    parser.add_argument('--debug', '-d', action='store_true', help='Enable debug mode')
+
+    args = parser.parse_args()
+    
+    if args.debug:
+        print(Fore.RED + "Debug mode enabled" + Style.RESET_ALL)
+        DEBUG_MODE = True
+        
     run(HTTPServer, CustomRequestHandler, PORT)
