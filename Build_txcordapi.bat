@@ -2,10 +2,11 @@
 echo Building TXCORDAPI
 title TXCORDAPI Builder
 
-pyinstaller txcordapi.py --noconfirm --onefile --console --icon "./favicon_io/favicon.ico"
-del /Q build
+pip install -r requirements.txt
+
+pyinstaller txcordapi.py --noconfirm --onefile --console --icon "./favicon.ico"
+rmdir /Q /S build
 del /Q *.spec
-ren dist txcordapi-built
 echo Finished Building TXCORDAPI
 
 pause
