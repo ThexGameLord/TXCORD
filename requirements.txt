@@ -1,4 +1,3 @@
-os
 socket
 requests
 json
