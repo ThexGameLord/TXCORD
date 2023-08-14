@@ -1,6 +1,5 @@
 requests
 argparse
-http.server
 configparser
 base64
 datetime
