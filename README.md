@@ -20,3 +20,7 @@ i made one [here](https://thexgamelord.uk.to/txcord)
 2. run **pip install pyinstaller** in your cmd  
 3. download the source code  
 4. run the **Build_txcordapi.bat** file on windows
+
+# screenshot
+
+![TXCORDAPI_1 2 31_08_2023 3_36_00 AM](https://github.com/ThexGameLord/TXCORD/assets/69915399/cc38271b-9485-4406-879e-f8a531fb3ff0)
