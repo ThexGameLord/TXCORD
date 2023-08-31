@@ -11,6 +11,7 @@ import datetime
 from colorama import Fore, Style, init
 import time
 import random
+import netifaces as ni
 
 init(autoreset=True)  # Initialize colorama
 global DEBUG_MODE
@@ -373,10 +374,9 @@ def format_player_list(payload):
 
 def get_public_ip():
     try:
-        # Use a public service to determine the public IP address
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(("1.1.1.1", 80))
-            public_ip = s.getsockname()[0]
+        response = requests.get("https://httpbin.org/ip")
+        data = response.json()
+        public_ip = data["origin"]
         return public_ip
     except Exception as e:
         print("Error while fetching public IP:", e)
@@ -385,8 +385,11 @@ def get_public_ip():
 
 def get_local_ip():
     try:
-        # Get the local IP address of the machine
-        local_ip = socket.gethostbyname(socket.gethostname())
+        # Get the default gateway interface name
+        default_gateway = ni.gateways()['default'][ni.AF_INET][1]
+
+        # Get the local IP address of the default gateway interface
+        local_ip = ni.ifaddresses(default_gateway)[ni.AF_INET][0]['addr']
         return local_ip
     except Exception as e:
         print("Error while fetching local IP:", e)
