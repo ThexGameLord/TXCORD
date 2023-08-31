@@ -1,7 +1,8 @@
 # TXCORD
+![favicon-32x32](https://github.com/ThexGameLord/TXCORD/assets/69915399/0363ad4f-93e9-4767-9aae-a741325587cc)<br>
 Just an api for minecraft to send server information to discord on a webhook
 
-i dont know how to use these lol 👇<br>
+i dont know how to use these lol 👇 *edit: i think i know now*<br>
 [![API](https://github.com/ThexGameLord/TXCORD/actions/workflows/API-test.yml/badge.svg?branch=API)](https://github.com/ThexGameLord/TXCORD/actions/workflows/API-test.yml)
 
 # checklist
