@@ -9,14 +9,44 @@ import configparser
 import base64
 import datetime
 from colorama import Fore, Style, init
+import time
+import random
 
 init(autoreset=True)  # Initialize colorama
 global DEBUG_MODE
 DEBUG_MODE = False
 config_file = "TXCORDAPI.cfg"
 
+TXASCII='''
+
+ooooooooooooo ooooooo  ooooo   .oooooo.     .oooooo.   ooooooooo.   oooooooooo.   
+8'   888   `8  `8888    d8'   d8P'  `Y8b   d8P'  `Y8b  `888   `Y88. `888'   `Y8b  
+     888         Y888..8P    888          888      888  888   .d88'  888      888 
+     888          `8888'     888          888      888  888ooo88P'   888      888 
+     888         .8PY888.    888          888      888  888`88b.     888      888 
+     888        d8'  `888b   `88b    ooo  `88b    d88'  888  `88b.   888     d88' 
+    o888o     o888o  o88888o  `Y8bood8P'   `Y8bood8P'  o888o  o888o o888bood8P'   
+                                                                                  
+                                                                                  
+                                                                                  
+
+'''
+
+TermF_colour = [Fore.MAGENTA, Fore.BLUE, Fore.CYAN]
+SeLected_colour = random.choice(TermF_colour)
+
+for letter in TXASCII:
+    print(SeLected_colour + letter + Style.RESET_ALL, end='', flush=True)
+    time.sleep(0.0001)  # Adjust the sleep duration to control the typing speed
+
+
 global ver_str
-ver_str = "TXCORDAPI/1.1"
+ver_str = "TXCORDAPI/1.2"
+
+try:
+    os.system(f"title {ver_str}")
+except Exception:
+    pass
 
 print(Fore.GREEN + f"Running {ver_str}" + Style.RESET_ALL)
 print("[ATTENTION] you can do txcordapi -h to show all arguements that can be used")
