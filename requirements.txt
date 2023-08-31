@@ -3,3 +3,4 @@ argparse
 configparser
 datetime
 colorama
+netifaces
