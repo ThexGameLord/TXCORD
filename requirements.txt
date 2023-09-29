@@ -1,6 +1,0 @@
-requests
-argparse
-configparser
-datetime
-colorama
-netifaces
