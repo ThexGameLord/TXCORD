@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TXCORDAPI Admin page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+    /* Dark mode styles */
+    .dark-mode {
+        background-color: dimgray;
+        color: #ffffff;
+    }
+
+    /* Additional dark mode styles for specific elements */
+    .dark-mode h1 {
+        color: #ffffff;
+    }
+    
+    body {
+        height: 200px;
+        width: 400px;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        margin-top: -100px;
+        margin-left: -200px;
+    }
+    </style>
+</head>
+<body>
+    <button onclick="window.location.href='/'">TXCORD HOME</button>
+    <h1>Welcome to TXCORDAPI ADMINISTRATOR PAGE</h1>
+    <a>A better User Interface will be made later.</a><br>
+    <button id="darkModeButton">Toggle Dark Mode</button><br>
+    <button onclick="window.location.href='https://github.com/thexgamelord/txcord'">TXCORD on github</button>
+    <br>
+    Thexgamelord
+    GitHub
+    Mojang
+    Hello World
+    
+    
+    
+    <script>
+    // Function to toggle dark mode
+    function toggleDarkMode() {
+        const body = document.body;
+        body.classList.toggle('dark-mode'); // Toggle a CSS class for dark mode
+
+        // Check if dark mode is active and set a cookie
+        const isDarkMode = body.classList.contains('dark-mode');
+        const expirationDate = new Date();
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set cookie expiration to 1 year
+
+        // Save the dark mode setting in a cookie
+        document.cookie = `TXCORDdarkMode=${isDarkMode}; expires=${expirationDate.toUTCString()}; path=/`;
+    }
+
+    // Add a click event listener to the dark mode button
+    document.getElementById('darkModeButton').addEventListener('click', toggleDarkMode);
+
+    // Function to check if dark mode is enabled from cookies and apply it
+    function checkDarkModeFromCookies() {
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'TXCORDdarkMode') {
+                const body = document.body;
+                if (value === 'true') {
+                    body.classList.add('dark-mode');
+                } else {
+                    body.classList.remove('dark-mode');
+                }
+            }
+        }
+    }
+
+    // Call the function to check dark mode from cookies when the page loads
+    window.addEventListener('load', checkDarkModeFromCookies);
+</script>
+</body>
+</html>
