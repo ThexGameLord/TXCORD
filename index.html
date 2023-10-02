@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TXCORDAPI Landing page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.6.1/justgage.min.js"></script>
+    <style>
+    /* Dark mode styles */
+    .dark-mode {
+        background-color: dimgray;
+        color: #ffffff;
+    }
+
+    /* Additional dark mode styles for specific elements */
+    .dark-mode h1 {
+        color: #ffffff;
+    }
+    
+    body {{
+        height: 200px;
+        width: 400px;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        margin-top: -100px;
+        margin-left: -200px;
+    }}
+    </style>
+</head>
+<body>
+    <h1>Welcome to TXCORDAPI</h1>
+    <button id="darkModeButton">Toggle Dark Mode</button>
+    <div id="playerCountGauge" style="width: 400px; height: 200px;"></div>
+    <p id="playerCount">Player Count: 69 / 100</p>
+    <p id="serverMotd">Server MOTD: WoW Cool Server MOTD | TXCORD DEMO</p>
+    <a>A better User Interface will be made later.</a>
+    <button onclick="window.location.href='https://github.com/thexgamelord/txcord'">TXCORD on github</button>
+    <button onclick="window.location.href='/admin'">TXCORD Admin page [WIP]</button>
+    
+    <script>
+        var playerCountGauge = new JustGage({
+            id: "playerCountGauge",
+            value: 69,
+            min: 0,
+            max: 100,
+            title: "Player Count",
+            label: "Players"
+        });
+
+        function updateGauge(playerCount) {
+            playerCountGauge.refresh(playerCount);
+        }
+
+        function updatePageContent() {
+        fetch('/internal/playercounting', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Basic ' + btoa("{INT_API_USER}" + ':' + "{INT_API_PASS}")
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update only the gauge value with the received player count
+            updateGauge(data.current_player_count);
+            document.getElementById("playerCount").innerHTML = "Player Count: " + data.current_player_count + " / " + data.max_player_count;
+            document.getElementById("serverMotd").innerHTML = "Server MOTD: " + data.nice_motd;
+            console.log("Current players updated to: " + data.current_player_count)
+            console.log("Current motd updated to: " + data.nice_motd)
+            console.log("Current max players updated to: " + data.max_player_count)
+            console.log("Updated Gauge");
+        })
+        .catch(error => {{
+            console.error("Error fetching data: " + error);
+        });
+    }
+
+    // Initial content update
+    updatePageContent();
+
+    // Periodically refresh content every 15 seconds
+    setInterval(updatePageContent, 30000);
+    </script>
+    
+    <script>
+    // Function to toggle dark mode
+    function toggleDarkMode() {{
+        const body = document.body;
+        body.classList.toggle('dark-mode'); // Toggle a CSS class for dark mode
+
+        // Check if dark mode is active and set a cookie
+        const isDarkMode = body.classList.contains('dark-mode');
+        const expirationDate = new Date();
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1); // Set cookie expiration to 1 year
+
+        // Save the dark mode setting in a cookie
+        document.cookie = `TXCORDdarkMode=${isDarkMode}; expires=${expirationDate.toUTCString()}; path=/`;
+    }
+
+    // Add a click event listener to the dark mode button
+    document.getElementById('darkModeButton').addEventListener('click', toggleDarkMode);
+
+    // Function to check if dark mode is enabled from cookies and apply it
+    function checkDarkModeFromCookies() {
+        const cookies = document.cookie.split(';');
+        for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'TXCORDdarkMode') {
+                const body = document.body;
+                if (value === 'true') {
+                    body.classList.add('dark-mode');
+                } else {
+                    body.classList.remove('dark-mode');
+                }
+            }
+        }
+    }
+
+    // Call the function to check dark mode from cookies when the page loads
+    window.addEventListener('load', checkDarkModeFromCookies);
+</script>
+</body>
+</html>
