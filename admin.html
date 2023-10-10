@@ -159,33 +159,7 @@ ZombiePigmanTamer
 <br>
 CaveSpiderSlayer
 <br>
-
-
     
-    
-<script>
-    alert("on real instance default user & password is DEMO, and normally would keep asking for identification or will show Unauthorized when canceled")
-    
-    a = prompt("username:")
-    b = prompt("password:")
-    
-    if (a === "DEMO" && b === "DEMO") {
-        console.log("real server would allow access to the locked page on success!")
-    }
-    else {
-        console.log("server will respond with unauthorized on incorrect information")
-    	// Create a new HTML document with the "Unauthorized" message
-                var newHTML = `
-                    <html><head><meta name="color-scheme" content="light dark"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">Unauthorized</pre></body></html>
-                `;
-                
-                // Replace the current document with the new one
-                document.open();
-                document.write(newHTML);
-                document.close();
-            
-    }
-</script>    
     <script>
     // Function to toggle dark mode
     function toggleDarkMode() {
@@ -222,6 +196,31 @@ CaveSpiderSlayer
 
     // Call the function to check dark mode from cookies when the page loads
     window.addEventListener('load', checkDarkModeFromCookies);
+</script>
+
+<script>
+    alert("on real instance default user & password is DEMO, and normally would keep asking for identification or will show Unauthorized when canceled")
+    
+    a = prompt("username:")
+    b = prompt("password:")
+    
+    if (a === "DEMO" && b === "DEMO") {
+        console.log("real server would allow access to the locked page on success!")
+    }
+    else {
+        console.log("server will respond with unauthorized on incorrect information")
+    	// Create a new HTML document with the "Unauthorized" message
+                var newHTML = `
+<!DOCTYPE html>
+                    <html><head><meta name="color-scheme" content="light dark"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">Unauthorized</pre></body></html>
+                `;
+                
+                // Replace the current document with the new one
+                document.open();
+                document.write(newHTML);
+                document.close();
+            
+    }
 </script>
 </body>
 </html>
